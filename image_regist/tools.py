@@ -107,18 +107,17 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
         if(Transform.TRANSLATION_Y in params):
             vel_val[params.index(Transform.TRANSLATION_Y)] = random.random()*random.random()
         velocities.append(vel_val)
-    
-    pbest_obj = [loss(data1, data2, params, x) for x in particles]
 
     particles = np.array(particles)
     velocities = np.array(velocities)
 
     pbest = np.array(particles)
+    pbest_obj = np.array([loss(data1, data2, params, x) for x in particles])
     gbest_obj = min(pbest_obj)
-    gbest = pbest[pbest_obj.index(gbest_obj)]
-    pbest_obj = np.array(pbest_obj)
+    gbest = pbest[np.where(pbest_obj==gbest_obj)[0][0]]
 
-    count_patience = 0;
+    count_patience = 0
+    gbest_obj_before = gbest_obj
     for iteration in range(iter):
         r1 = random.random();
         r2 = random.random();
@@ -128,20 +127,28 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
         velocities = w * velocities + c1*r1*(pbest - particles) + c2*r2*(gbest-particles)
         particles = particles + velocities
 
-        pbest_obj_up = [loss(data1, data2, params, x) for x in particles]
+        pbest_obj_temp = np.array([loss(data1, data2, params, x) for x in particles])
 
         for id_par in range(0, len(particles)):
-            if(pbest_obj_up[id_par]<pbest_obj[id_par]):
+            if(pbest_obj_temp[id_par]<pbest_obj[id_par]):
                 pbest[id_par] = particles[id_par]
+                pbest_obj[id_par] = pbest_obj_temp[id_par]
 
-        pbest_obj = np.array(pbest_obj_up)
-        gbest_obj = min(pbest_obj_up)
-        gbest = pbest[pbest_obj_up.index(gbest_obj)]
+        gbest_obj = min(pbest_obj)
+        gbest = pbest[np.where(pbest_obj == gbest_obj)[0][0]]
 
-        print("Iter:", iteration, "best param", [x.name for x in params], ":", gbest)
+        print("Iter:", iteration+1, "best param", [x.name for x in params], ":", gbest)
+        print("gbest val", gbest_obj, "count patience", count_patience)
+
+        if(gbest_obj != gbest_obj_before):
+            count_patience = 0
+            gbest_obj_before = gbest_obj
+        
+        if(count_patience >= patience):
+            break
         count_patience += 1
     
-    # print(gbest)
+    return gbest
         
 
 def findTransformation(data1, data2, params):
