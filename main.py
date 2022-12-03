@@ -1,22 +1,20 @@
-from image_regist.tools import findTransformation, Transform
 from PIL import Image
-img1 = Image.open("resource\Elang_Jawa.jpg")
-img2 = Image.open("resource\Elang_Jawa.jpg")
+from image_regist.tools import findTransformation, Transform, transform_image_2d
 
+reference_image = Image.open("resource\Elang_Jawa.jpg")
+target_image = Image.open("resource\Elang_Jawa.jpg")
 
-trans_x = 20
-trans_y = 40
-img2 = img2.rotate(45)
-img2 = img2.transform(img2.size, Image.Transform.AFFINE,
-                      (1, 0, trans_x, 0, 1, trans_y))
+target_image = transform_image_2d(target_image, [Transform.ROTATION, 
+                                Transform.TRANSLATION_X, Transform.TRANSLATION_Y], [-45, -20, 3])
 
-img3 = img2.transform(img2.size, Image.Transform.AFFINE, (1, 0, 19.68641438, 0, 1, -57.44388179))
-img3 = img3.rotate(-47.36936165)
+findTransformation(reference_image, target_image, [Transform.ROTATION, 
+                                Transform.TRANSLATION_X, 
+                                Transform.TRANSLATION_Y])
 
-img1.save("test1.jpg")
-img2.save("test2.jpg")
-img3.save("test3.jpg")
+# tranformed_image = transform_image_2d(target_image, [Transform.ROTATION, 
+#                                 Transform.TRANSLATION_X, Transform.TRANSLATION_Y], 
+#                                 [ 44.98814041, 12.13631626, -15.76185011])
 
-import numpy as np
-
-# findTransformation(img1, img2, [Transform.TRANSLATION_X, Transform.ROTATION, Transform.TRANSLATION_Y])
+# reference_image.save("01_reference_image.jpg")
+# target_image.save("02_target_image.jpg")
+# tranformed_image.save("03_tranformed_image.jpg")

@@ -51,18 +51,21 @@ def mutual_information_2d(x, y, sigma=1, normalized=False):
 
     return mi
 
-def loss(data1, data2, params, param_vals):
+def transform_image_2d(data, params, param_vals):
     if(Transform.ROTATION in params):
-        data2 = data2.rotate(param_vals[params.index(Transform.ROTATION)])
+        data = data.rotate(param_vals[params.index(Transform.ROTATION)])
     if(Transform.TRANSLATION_X in params):
-        data2 = data2.transform(data2.size,
+        data = data.transform(data.size,
                     Image.Transform.AFFINE, 
                     (1, 0, param_vals[params.index(Transform.TRANSLATION_X)], 0, 1, 0))
     if(Transform.TRANSLATION_Y in params):
-        data2 = data2.transform(data2.size, 
+        data = data.transform(data.size, 
                     Image.Transform.AFFINE,
                     (1, 0, 0, 0, 1, param_vals[params.index(Transform.TRANSLATION_Y)]))
+    return data
 
+def loss(data1, data2, params, param_vals):
+    data2 = transform_image_2d(data2, params, param_vals)
     mi = mutual_information_2d(np.asarray(data1).ravel(), np.asarray(data2).ravel())
     return -mi
     
@@ -105,10 +108,12 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
             vel_val[params.index(Transform.TRANSLATION_Y)] = random.random()*random.random()
         velocities.append(vel_val)
     
+    pbest_obj = [loss(data1, data2, params, x) for x in particles]
+
     particles = np.array(particles)
     velocities = np.array(velocities)
+
     pbest = np.array(particles)
-    pbest_obj = [loss(data1, data2, params, x) for x in particles]
     gbest_obj = min(pbest_obj)
     gbest = pbest[pbest_obj.index(gbest_obj)]
     pbest_obj = np.array(pbest_obj)
@@ -133,7 +138,7 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
         gbest_obj = min(pbest_obj_up)
         gbest = pbest[pbest_obj_up.index(gbest_obj)]
 
-        print("iter:", iteration, "best param:", gbest)
+        print("Iter:", iteration, "best param", [x.name for x in params], ":", gbest)
         count_patience += 1
     
     # print(gbest)
