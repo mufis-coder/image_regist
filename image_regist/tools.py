@@ -1,6 +1,7 @@
 from enum import Enum
 from scipy import ndimage
 from PIL import Image
+import random
 import numpy as np
 
 class Transform(Enum):
@@ -64,22 +65,29 @@ def transform_image_2d(data, params, param_vals):
                     (1, 0, 0, 0, 1, param_vals[params.index(Transform.TRANSLATION_Y)]))
     return data
 
-def loss(data1, data2, params, param_vals):
+def loss(data1, data2, params, param_vals, faster_sample=None):
     data2 = transform_image_2d(data2, params, param_vals)
-    mi = mutual_information_2d(np.asarray(data1).ravel(), np.asarray(data2).ravel())
+    if(faster_sample == None):
+        mi = mutual_information_2d(np.asarray(data1).ravel(), np.asarray(data2).ravel())
+    else:
+        d1 = np.take(data1, faster_sample)
+        d2 = np.take(data2, faster_sample)
+        mi = mutual_information_2d(np.asarray(d1).ravel(), np.asarray(d2).ravel())
+
     return -mi
     
-def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
+def pso(data1, data2, params, iter=100, random_particles=True, patience=10):
     c1 = 0.1
     c2 = 0.1
     w = 0.8
 
     width2, height2 = data2.size
 
+    faster_sample = random.sample(range(0, width2*height2), round(width2*height2*0.2))
+
     # [[param1, param2, param3], [param1, param2, param3]]
     particles = []
     if(random_particles):
-        import random
         
         n_particles = 36
         
@@ -112,7 +120,7 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
     velocities = np.array(velocities)
 
     pbest = np.array(particles)
-    pbest_obj = np.array([loss(data1, data2, params, x) for x in particles])
+    pbest_obj = np.array([loss(data1, data2, params, x, faster_sample) for x in particles])
     gbest_obj = min(pbest_obj)
     gbest = pbest[np.where(pbest_obj==gbest_obj)[0][0]]
 
@@ -127,7 +135,7 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
         velocities = w * velocities + c1*r1*(pbest - particles) + c2*r2*(gbest-particles)
         particles = particles + velocities
 
-        pbest_obj_temp = np.array([loss(data1, data2, params, x) for x in particles])
+        pbest_obj_temp = np.array([loss(data1, data2, params, x, faster_sample) for x in particles])
 
         for id_par in range(0, len(particles)):
             if(pbest_obj_temp[id_par]<pbest_obj[id_par]):
@@ -140,7 +148,7 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
         print("Iter:", iteration+1, "best param", [x.name for x in params], ":", gbest)
         print("gbest val", gbest_obj, "count patience", count_patience)
 
-        if(gbest_obj != gbest_obj_before):
+        if(round(gbest_obj, 3) != round(gbest_obj_before, 3)):
             count_patience = 0
             gbest_obj_before = gbest_obj
         
@@ -152,7 +160,5 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=20):
         
 
 def findTransformation(data1, data2, params):
-    pso(data1, data2, params)
-#     print(len(np.asarray(img1).ravel()))
-# print(mutual_information_2d(np.asarray(img1).ravel(), np.asarray(img2).ravel()))
-#     
+    result = pso(data1, data2, params)
+    return result
