@@ -3,3 +3,4 @@ dist/
 image_regist.egg-info/
 venv/
 **/__pycache__/
+**.png

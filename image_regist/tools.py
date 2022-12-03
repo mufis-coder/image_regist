@@ -76,21 +76,23 @@ def loss(data1, data2, params, param_vals, faster_sample=None):
 
     return -mi
     
-def pso(data1, data2, params, iter=100, random_particles=True, patience=10):
+def pso(data1, data2, params, faster=False, iter=100, random_particles=True, patience=10):
     c1 = 0.1
     c2 = 0.1
     w = 0.8
 
     width2, height2 = data2.size
 
-    faster_sample = random.sample(range(0, width2*height2), round(width2*height2*0.2))
+    if(faster):
+        faster_sample = random.sample(range(0, width2*height2), round(width2*height2*0.2))
+    else:
+        faster_sample = None
 
     # [[param1, param2, param3], [param1, param2, param3]]
     particles = []
     if(random_particles):
         
-        n_particles = 36
-        
+        n_particles = 25
         for _ in range(n_particles):
             par_val = [-1]*len(params)
 
@@ -146,7 +148,7 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=10):
         gbest = pbest[np.where(pbest_obj == gbest_obj)[0][0]]
 
         print("Iter:", iteration+1, "best param", [x.name for x in params], ":", gbest)
-        print("gbest val", gbest_obj, "count patience", count_patience)
+        # print("gbest val", gbest_obj, "count patience", count_patience)
 
         if(round(gbest_obj, 3) != round(gbest_obj_before, 3)):
             count_patience = 0
@@ -154,11 +156,23 @@ def pso(data1, data2, params, iter=100, random_particles=True, patience=10):
         
         if(count_patience >= patience):
             break
+
+        # robustness
+        if (count_patience > patience - 4):
+            for particle in particles:
+                flag_rand = random.randint(0, 4)
+                if(flag_rand==0 and Transform.ROTATION in params):
+                    particle[params.index(Transform.ROTATION)] -= 180
+                if(flag_rand==1 and Transform.TRANSLATION_X in params):
+                    particle[params.index(Transform.TRANSLATION_X)] *= -1
+                if(flag_rand==2 and Transform.TRANSLATION_Y in params):
+                    particle[params.index(Transform.TRANSLATION_Y)] *= -1
+
         count_patience += 1
     
     return gbest
         
 
-def findTransformation(data1, data2, params):
-    result = pso(data1, data2, params)
+def findTransformation(data1, data2, params, faster=False):
+    result = pso(data1, data2, params, faster)
     return result
