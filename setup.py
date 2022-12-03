@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="image-regist",                     # This is the name of the package
-    version="0.0.3",                        # The initial release version
+    version="0.0.4",                        # The initial release version
     author="Muhamad Fikri Sunandar",                     # Full name of the author
     description="Image Registration Library",
     long_description=long_description,      # Long description read from the the readme file
