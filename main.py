@@ -5,7 +5,7 @@ reference_image = Image.open("resource\Elang_Jawa.jpg")
 target_image = Image.open("resource\Elang_Jawa.jpg")
 
 target_image = transform_image_2d(target_image, [Transform.ROTATION, 
-                                Transform.TRANSLATION_X, Transform.TRANSLATION_Y], [89, -20, 3])
+                                Transform.TRANSLATION_X, Transform.TRANSLATION_Y], [40, -20, 3])
 
 best_params = findTransformation(reference_image, target_image, [Transform.ROTATION, 
                                 Transform.TRANSLATION_X, 
