@@ -43,7 +43,9 @@ target_image = Image.open("your-target-image-file")
 """
 Find best parameters to transform target image
 ----
-In this example three transformations are used [Transform.ROTATION, Transform.TRANSLATION X, Transform.TRANSLATION_Y]. You can use less than three and you don't have to use them sequentially. The result of ---best_params--- is a list in the order according to the parameter ---params---.
+In this example three transformations are used [Transform.ROTATION, Transform.TRANSLATION X, 
+Transform.TRANSLATION_Y]. You can use less than three and you don't have to use them sequentially. 
+The result of ---best_params--- is a list in the order according to the parameter ---params---.
 ---
 If you want the algorithm to run faster, you can set parameter ---faster=True---
 """
