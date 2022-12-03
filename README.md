@@ -51,7 +51,7 @@ best_params = findTransformation(data1=reference_image, data2=target_image, para
                                 Transform.TRANSLATION_X, 
                                 Transform.TRANSLATION_Y], faster=False)
 
-# Image transformation according to the parameters that have been searched for
+# Transform the target image according to the parameters that have been searched for
 tranformed_image = transform_image_2d(target_image, [Transform.ROTATION, 
                                 Transform.TRANSLATION_X, Transform.TRANSLATION_Y], 
                                 best_params)
