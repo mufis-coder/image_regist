@@ -5,12 +5,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="image-regist",                     # This is the name of the package
-    version="0.0.4",                        # The initial release version
+    version="0.0.5",                        # The initial release version
     author="Muhamad Fikri Sunandar",                     # Full name of the author
     description="Image Registration Library",
     long_description=long_description,      # Long description read from the the readme file
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(include=['imageregist']),    # List of all python modules to be installed
+    packages=setuptools.find_packages(include=['image_regist']),    # List of all python modules to be installed
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
