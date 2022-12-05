@@ -171,8 +171,70 @@ def pso(data1, data2, params, faster=False, iter=100, random_particles=True, pat
         count_patience += 1
     
     return gbest
+
+def derivative_function(data1, data2, params, param_vals):
+    delta = 1
+    par_val_d = np.copy(param_vals)
+    if(Transform.ROTATION in params):
+        d2_tranformed = transform_image_2d(data2, [Transform.ROTATION], 
+                            [param_vals[params.index(Transform.ROTATION)]])
+        d2_tranformed_delta = transform_image_2d(data2, [Transform.ROTATION], 
+                            [param_vals[params.index(Transform.ROTATION)] + delta])
+        mi1 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed).ravel())
+        mi2 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed_delta).ravel())
+        par_val_d[params.index(Transform.ROTATION)] = (mi2-mi1)/delta
+
+    if(Transform.TRANSLATION_X in params):
+        d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_X], 
+                            [param_vals[params.index(Transform.TRANSLATION_X)]])
+        d2_tranformed_delta = transform_image_2d(data2, [Transform.TRANSLATION_X], 
+                            [param_vals[params.index(Transform.TRANSLATION_X)] + delta])
+        mi1 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed).ravel())
+        mi2 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed_delta).ravel())
+        par_val_d[params.index(Transform.TRANSLATION_X)] = (mi2-mi1)/delta
+
+    if(Transform.TRANSLATION_Y in params):
+        d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_Y], 
+                            [param_vals[params.index(Transform.TRANSLATION_Y)]])
+        d2_tranformed_delta = transform_image_2d(data2, [Transform.TRANSLATION_Y], 
+                            [param_vals[params.index(Transform.TRANSLATION_Y)] + delta])
+        mi1 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed).ravel())
+        mi2 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed_delta).ravel())
+        par_val_d[params.index(Transform.TRANSLATION_Y)] = (mi2-mi1)/delta
+    
+    return par_val_d
+
+def gd(data1, data2, params):
+    rate = 10000
+    iteration = 100
+
+    par_vals = [-1]*len(params)
+    width2, height2 = data2.size
+
+    if(Transform.ROTATION in params):
+        par_vals[params.index(Transform.ROTATION)] = round(random.uniform(-360, 360), 3)
+    if(Transform.TRANSLATION_X in params):
+        par_vals[params.index(Transform.TRANSLATION_X)] = round(random.uniform(-width2/2, width2/2), 3)
+    if(Transform.TRANSLATION_Y in params):
+        par_vals[params.index(Transform.TRANSLATION_Y)] = round(random.uniform(-height2/2, height2/2), 3)
+
+    best_param = np.copy(par_vals)
+    for i in range(0, iteration):
+        loss_val = loss(data1, data2, params, best_param)
+
+        param_val_derivative = derivative_function(data1, data2, params, best_param)
+
+        best_param[0] = best_param[0] - rate * param_val_derivative[0];
+        best_param[1] = best_param[1] - rate * param_val_derivative[1];
+        best_param[2] = best_param[2] - rate * param_val_derivative[2];
+
+        print("Iter:", i+1, "best param", [x.name for x in params], ":", best_param)
+        print("derivative", param_val_derivative)
+        print("loss", loss_val)
         
+    return best_param;
 
 def findTransformation(data1, data2, params, faster=False):
-    result = pso(data1, data2, params, faster)
+    # result = pso(data1, data2, params, faster)
+    result = gd(data1, data2, params)
     return result
