@@ -288,7 +288,91 @@ def gd(data1, data2, params):
     return best_param
 
 
+def gradient_powell(data1, data2, params, param_vals):
+    par_val_d = np.copy(param_vals)
+    if (Transform.ROTATION in params):
+        d2_tranformed = transform_image_2d(data2, [Transform.ROTATION],
+                                           [param_vals[params.index(Transform.ROTATION)]])
+
+        par_val_d[params.index(Transform.ROTATION)] = 0.1*derivative_ce(
+            np.asarray(data1).ravel(), np.asarray(d2_tranformed).ravel())
+
+    if (Transform.TRANSLATION_X in params):
+        d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_X],
+                                           [param_vals[params.index(Transform.TRANSLATION_X)]])
+
+        par_val_d[params.index(Transform.TRANSLATION_X)] = 0.1* derivative_ce(
+            np.asarray(data1).ravel(), np.asarray(d2_tranformed).ravel())
+
+    if (Transform.TRANSLATION_Y in params):
+        d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_Y],
+                                           [param_vals[params.index(Transform.TRANSLATION_Y)]])
+
+        par_val_d[params.index(Transform.TRANSLATION_Y)] = 0.1* derivative_ce(
+            np.asarray(data1).ravel(), np.asarray(d2_tranformed).ravel())
+
+    return par_val_d
+
+
+def powell(data1, data2, params, x0, tol=1e-6, maxiter=100):
+
+    def obj_func(args):
+        print("hallo")
+        return loss(data1, data2, params, args)
+
+    grad = np.gradient(obj_func, x0)
+    fx = obj_func(x0)
+    
+    d = -grad
+    
+    i = 0
+    
+    while i < maxiter and np.linalg.norm(grad) > tol:
+        x1 = x0 + d
+        grad = np.gradient(obj_func, x1)
+        fx1 = obj_func(x1)
+        
+        if fx1 < fx:
+            x0 = x1
+            fx = fx1
+            
+            d = -grad
+        
+        else:
+            d = -grad
+        
+
+        print("Iter:", i+1, "best param",
+              [x.name for x in params], ":", x0)
+        print("gradient", grad)
+        print("loss", fx1)
+        
+        i += 1
+    
+    return [i for i in x0]
+
+def obj_function():
+    pass
+
+def pow_impl(data1, data2, params):
+
+    par_vals = [-1]*len(params)
+    width2, height2 = data2.size
+
+    if (Transform.ROTATION in params):
+        par_vals[params.index(Transform.ROTATION)] = round(
+            random.uniform(-360, 360), 3)
+    if (Transform.TRANSLATION_X in params):
+        par_vals[params.index(Transform.TRANSLATION_X)] = round(
+            random.uniform(-width2/8, width2/8), 3)
+    if (Transform.TRANSLATION_Y in params):
+        par_vals[params.index(Transform.TRANSLATION_Y)] = round(
+            random.uniform(-height2/8, height2/8), 3)
+            
+    return powell(data1, data2, params, par_vals)
+
 def findTransformation(data1, data2, params, faster=False):
     # result = pso(data1, data2, params, faster)
-    result = gd(data1, data2, params)
+    # result = gd(data1, data2, params)
+    result = pow_impl(data1, data2, params)
     return result

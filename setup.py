@@ -18,5 +18,5 @@ setuptools.setup(
     ],                                      # Information to filter the project on PyPi website
     python_requires='>=3.6',                # Minimum version requirement of the package
     py_modules=["image-regist"],             # Name of the python package
-    install_requires=['numpy==1.21.6', 'Pillow==9.3.0', 'scipy==1.7.3']                     # Install other dependencies if any
+    install_requires=['numpy==1.21.6', 'Pillow==9.3.0', 'scipy==1.7.3', 'numdifftools==0.9.41']                     # Install other dependencies if any
 )
