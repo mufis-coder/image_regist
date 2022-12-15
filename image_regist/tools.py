@@ -3,6 +3,7 @@ from scipy import ndimage
 from PIL import Image
 import random
 import numpy as np
+import numdifftools as nd
 
 
 class Transform(Enum):
@@ -301,14 +302,14 @@ def gradient_powell(data1, data2, params, param_vals):
         d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_X],
                                            [param_vals[params.index(Transform.TRANSLATION_X)]])
 
-        par_val_d[params.index(Transform.TRANSLATION_X)] = 0.1* derivative_ce(
+        par_val_d[params.index(Transform.TRANSLATION_X)] = 0.1 * derivative_ce(
             np.asarray(data1).ravel(), np.asarray(d2_tranformed).ravel())
 
     if (Transform.TRANSLATION_Y in params):
         d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_Y],
                                            [param_vals[params.index(Transform.TRANSLATION_Y)]])
 
-        par_val_d[params.index(Transform.TRANSLATION_Y)] = 0.1* derivative_ce(
+        par_val_d[params.index(Transform.TRANSLATION_Y)] = 0.1 * derivative_ce(
             np.asarray(data1).ravel(), np.asarray(d2_tranformed).ravel())
 
     return par_val_d
@@ -317,42 +318,46 @@ def gradient_powell(data1, data2, params, param_vals):
 def powell(data1, data2, params, x0, tol=1e-6, maxiter=100):
 
     def obj_func(args):
-        print("hallo")
         return loss(data1, data2, params, args)
 
-    grad = np.gradient(obj_func, x0)
+    grad = nd.Gradient(obj_func)
+    grad = grad(x0)
+    grad = np.array([i*1000 for i in grad])
     fx = obj_func(x0)
-    
+
     d = -grad
-    
+
     i = 0
-    
+
     while i < maxiter and np.linalg.norm(grad) > tol:
         x1 = x0 + d
-        grad = np.gradient(obj_func, x1)
+        grad = nd.Gradient(obj_func)
+        grad = grad(x1)
+        grad = np.array([i*1000 for i in grad])
         fx1 = obj_func(x1)
-        
+
         if fx1 < fx:
             x0 = x1
             fx = fx1
-            
+
             d = -grad
-        
+
         else:
             d = -grad
-        
 
         print("Iter:", i+1, "best param",
               [x.name for x in params], ":", x0)
         print("gradient", grad)
         print("loss", fx1)
-        
+
         i += 1
-    
+
     return [i for i in x0]
+
 
 def obj_function():
     pass
+
 
 def pow_impl(data1, data2, params):
 
@@ -368,8 +373,9 @@ def pow_impl(data1, data2, params):
     if (Transform.TRANSLATION_Y in params):
         par_vals[params.index(Transform.TRANSLATION_Y)] = round(
             random.uniform(-height2/8, height2/8), 3)
-            
+
     return powell(data1, data2, params, par_vals)
+
 
 def findTransformation(data1, data2, params, faster=False):
     # result = pso(data1, data2, params, faster)

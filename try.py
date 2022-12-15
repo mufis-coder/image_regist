@@ -39,11 +39,12 @@ def powell(f, x0, tol=1e-6, maxiter=1e4):
     i += 1
     
   # Return the optimal point and the number of iterations
+  print("f1", fx1)
   return x0, i
 
 # Define a test function
 def f(x):
-  return x[0]*2 + x[1]*2
+  return x[0]**2 + x[1]**2
 
 # Test the powell function
 x0 = np.array([2, 3])
