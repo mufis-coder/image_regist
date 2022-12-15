@@ -173,34 +173,34 @@ def pso(data1, data2, params, faster=False, iter=100, random_particles=True, pat
     return gbest
 
 def derivative_function(data1, data2, params, param_vals):
-    delta = 1
+    delta = 0.1
     par_val_d = np.copy(param_vals)
     if(Transform.ROTATION in params):
         d2_tranformed = transform_image_2d(data2, [Transform.ROTATION], 
-                            [param_vals[params.index(Transform.ROTATION)]])
-        d2_tranformed_delta = transform_image_2d(data2, [Transform.ROTATION], 
                             [param_vals[params.index(Transform.ROTATION)] + delta])
+        d2_tranformed_delta = transform_image_2d(data2, [Transform.ROTATION], 
+                            [param_vals[params.index(Transform.ROTATION)] - delta])
         mi1 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed).ravel())
         mi2 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed_delta).ravel())
-        par_val_d[params.index(Transform.ROTATION)] = (mi2-mi1)/delta
+        par_val_d[params.index(Transform.ROTATION)] = (mi2-mi1)/(2*delta)
 
     if(Transform.TRANSLATION_X in params):
         d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_X], 
-                            [param_vals[params.index(Transform.TRANSLATION_X)]])
+                            [param_vals[params.index(Transform.TRANSLATION_X)]+ delta])
         d2_tranformed_delta = transform_image_2d(data2, [Transform.TRANSLATION_X], 
-                            [param_vals[params.index(Transform.TRANSLATION_X)] + delta])
+                            [param_vals[params.index(Transform.TRANSLATION_X)] - delta])
         mi1 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed).ravel())
         mi2 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed_delta).ravel())
-        par_val_d[params.index(Transform.TRANSLATION_X)] = (mi2-mi1)/delta
+        par_val_d[params.index(Transform.TRANSLATION_X)] = (mi2-mi1)/(2*delta)
 
     if(Transform.TRANSLATION_Y in params):
         d2_tranformed = transform_image_2d(data2, [Transform.TRANSLATION_Y], 
-                            [param_vals[params.index(Transform.TRANSLATION_Y)]])
-        d2_tranformed_delta = transform_image_2d(data2, [Transform.TRANSLATION_Y], 
                             [param_vals[params.index(Transform.TRANSLATION_Y)] + delta])
+        d2_tranformed_delta = transform_image_2d(data2, [Transform.TRANSLATION_Y], 
+                            [param_vals[params.index(Transform.TRANSLATION_Y)] - delta])
         mi1 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed).ravel())
         mi2 = mutual_information_2d(np.array(data1).ravel(), np.array(d2_tranformed_delta).ravel())
-        par_val_d[params.index(Transform.TRANSLATION_Y)] = (mi2-mi1)/delta
+        par_val_d[params.index(Transform.TRANSLATION_Y)] = (mi2-mi1)/(2*delta)
     
     return par_val_d
 
